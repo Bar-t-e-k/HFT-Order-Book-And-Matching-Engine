@@ -31,13 +31,10 @@ public:
     }
 
     void release(T* obj) {
-        // Zamiast szukać obiektu, obliczamy jego indeks na podstawie arytmetyki wskaźników.
-        // Odległość między wskaźnikiem na obiekt a początkiem wektora to jego indeks.
         size_t index = std::distance(pool.data(), obj);
         free_indices.push_back(index);
     }
-    
-    // Funkcja pomocnicza do monitorowania zajętości
+
     size_t available() const {
         return free_indices.size();
     }
