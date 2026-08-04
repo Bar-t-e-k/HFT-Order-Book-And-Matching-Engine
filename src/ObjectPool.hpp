@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 #include <stdexcept>
-#include <cstdint>
 #include <iterator>
 
 template <typename T>
@@ -35,7 +34,7 @@ public:
         free_indices.push_back(index);
     }
 
-    size_t available() const {
+    [[nodiscard]] size_t available() const {
         return free_indices.size();
     }
 };

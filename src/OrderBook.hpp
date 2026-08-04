@@ -4,9 +4,10 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <mutex>
+#include <shared_mutex>
 
 class OrderBook {
-private:
     struct PriceLevel {
         Order* head = nullptr;
         Order* tail = nullptr;
@@ -29,7 +30,7 @@ private:
             return order;
         }
         
-        bool empty() const { return head == nullptr; }
+        [[nodiscard]] bool empty() const { return head == nullptr; }
     };
 
     std::vector<PriceLevel> bids;
@@ -43,14 +44,23 @@ private:
     ObjectPool<Order>& order_pool;
     std::string_view book_symbol;
 
+    mutable std::shared_mutex rw_mutex;
+
 public:
     explicit OrderBook(ObjectPool<Order>& pool, std::string_view symbol, size_t max_price = 100000)
         : bids(max_price), asks(max_price), best_ask(max_price - 1), order_pool(pool), book_symbol(symbol) {
         trade_history.reserve(10000);
     }
 
+    std::pair<uint32_t, uint32_t> get_top_of_book() const {
+        std::shared_lock<std::shared_mutex> lock(rw_mutex);
+        return {best_bid, best_ask};
+    }
+
     template <ValidNumericType T_ID, ValidNumericType T_Price, ValidNumericType T_Vol>
     void add_order(T_ID id, T_Price price, T_Vol volume, Side side) {
+        std::unique_lock<std::shared_mutex> lock(rw_mutex);
+
         Order* order = order_pool.acquire();
         order->reset(id, price, volume, side, book_symbol);
 
