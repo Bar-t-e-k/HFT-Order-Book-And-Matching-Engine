@@ -10,6 +10,7 @@ struct IncomingOrder {
     uint32_t price;
     uint32_t volume;
     Side side;
+    OrderType type;
 };
 
 class ThreadSafeQueue {

@@ -9,6 +9,12 @@ enum class Side : uint8_t {
     SELL
 };
 
+enum class OrderType : uint8_t {
+    LIMIT,
+    IOC,
+    FOK
+};
+
 struct alignas(64) TradeReport {
     uint64_t buy_order_id;
     uint64_t sell_order_id;
@@ -22,15 +28,17 @@ struct alignas(64) Order {
     uint32_t price;
     uint32_t volume;
     Side side;
+    OrderType type;
     std::string_view symbol;
 
     Order* next{nullptr};
 
-    void reset(uint64_t new_id, uint32_t new_price, uint32_t new_volume, Side new_side, std::string_view new_symbol) {
+    void reset(uint64_t new_id, uint32_t new_price, uint32_t new_volume, Side new_side, OrderType new_type, std::string_view new_symbol) {
         id = new_id;
         price = new_price;
         volume = new_volume;
         side = new_side;
+        type = new_type;
         symbol = new_symbol;
         next = nullptr;
     }
